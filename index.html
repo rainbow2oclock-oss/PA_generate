@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PA表 Generator |</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .pa-app-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .ch-col {
+            width: 60px;
+        }
+
+        .position-col {
+            width: 80px;
+            background-color: #fef3c7;
+        }
+
+        .bandmaster-col {
+            width: 80px;
+            text-align: center;
+        }
+
+        .draggable-row {
+            cursor: move;
+        }
+
+        .draggable-row:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-add-row {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .actions {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .info-note {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .stage-label {
+            color: white;
+            font-weight: bold;
+            writing-mode: vertical-rl;
+            margin-right: 10px;
+        }
+
+        .stage-member-box {
+            width: 80px;
+            height: 100px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stage-member-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stage-member-box.dragging {
+            opacity: 0.5;
+            transform: scale(0.9);
+        }
+
+        .member-num {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        .member-part {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">🎵 PA表 Generator</div>
+        </nav>
+
+        <main class="container">
+            <section class="hero fade-in">
+                <div class="hero-content">
+                    <h1>🎚️ PA表 Generator</h1>
+                    <p>ライブPA表を簡単作成・PDF出力</p>
+                </div>
+            </section>
+
+            <div class="pa-app-container fade-in">
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        基本情報
+                    </h2>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label>出演順 *</label>
+                            <input type="text" id="order" class="form-control" placeholder="例: 3">
+                        </div>
+                        <div class="form-group">
+                            <label>バンド名 *</label>
+                            <input type="text" id="bandName" class="form-control" placeholder="例: The A-cappellas">
+                        </div>
+                        <div class="form-group">
+                            <label>日付</label>
+                            <input type="date" id="eventDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>イベント名</label>
+                            <input type="text" id="eventName" class="form-control" placeholder="例: 定期ライブ">
+                        </div>
+                    </div>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        出演者情報
+                    </h2>
+                    <div class="info-note">
+                        <strong>📌 使い方:</strong> ☰マークをドラッグして行を並び替えできます
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">☰</th>
+                                    <th class="ch-col">マイク番号</th>
+                                    <th>パート</th>
+                                    <th class="bandmaster-col">バンマス</th>
+                                    <th>氏名</th>
+                                    <th>ニックネーム</th>
+                                    <th class="position-col">立ち位置</th>
+                                    <th style="width: 60px;">削除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button id="add-member-btn" class="btn-add-row">+ メンバーを追加</button>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        立ち位置調整（ドラッグで移動）</h2>
+                    <div class="info-note">
+                        <strong>🎭 使い方:</strong> 下のボックスをドラッグして立ち位置を調整できます。テーブルの順序も自動で更新されます。
+                    </div>
+                    <div id="stage-layout"
+                        style="display: flex; gap: 10px; padding: 20px; background: linear-gradient(to bottom, #1e3a8a 0%, #3b82f6 100%); border-radius: 12px; justify-content: center; align-items: center; min-height: 150px;">
+                    </div>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h3>立ち位置順（参考）</h3>
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <span style="margin: 0 2rem;">← 下手</span>
+                        <span id="position-preview" style="font-weight: bold;">-</span>
+                        <span style="margin: 0 2rem;">上手 →</span>
+                    </div>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        SE希望（入退場に使うもの）</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label>入場SE</label>
+                            <input type="text" id="entranceSE" class="form-control" placeholder="曲名">
+                        </div>
+                        <div class="form-group">
+                            <label>退場SE</label>
+                            <input type="text" id="exitSE" class="form-control" placeholder="曲名">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>備考</label>
+                        <textarea id="seRemarks" class="form-control" rows="2" placeholder="SEに関する補足があれば記入"></textarea>
+                    </div>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        曲順等
+                    </h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">曲順</th>
+                                    <th style="width: 80px;">種類</th>
+                                    <th>曲名</th>
+                                    <th style="width: 80px;">テンポ</th>
+                                    <th style="width: 80px;">時間</th>
+                                    <th>備考</th>
+                                    <th style="width: 60px;">削除</th>
+                                </tr>
+                            </thead>
+                            <tbody id="setlist-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button id="add-song-btn" class="btn-add-row">+ 曲を追加</button>
+                        <button id="add-mc-btn" class="btn-add-row" style="background: #8b5cf6;">+ MCを追加</button>
+                    </div>
+                </section>
+
+                <section style="margin-bottom: 3rem;">
+                    <h2 style="border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+                        その他（何かあれば記入）</h2>
+                    <textarea id="otherRemarks" class="form-control" rows="4"
+                        placeholder="PAへの要望、ステージ配置の補足など"></textarea>
+                </section>
+
+                <div class="actions">
+                    <button id="generate-pdf-btn" class="btn btn-primary"
+                        style="font-size: 1.2rem; padding: 1rem 3rem;">
+                        📄 PDFを作成してダウンロード
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026. All rights reserved.</p>
+        </footer>
+
+        <script src="js/libs/jspdf.umd.min.js"></script>
+        <script src="js/libs/jspdf.plugin.autotable.min.js"></script>
+        <script src="js/font_data.js"></script>
+        <script src="js/pa_app.js"></script>
+        <script src="js/main.js"></script>
+</body>
+
+</html>
